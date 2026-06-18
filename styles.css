@@ -463,6 +463,24 @@ input:focus-visible {
   color: var(--text-muted);
 }
 
+/* Left pane shows rich formatting so user can see what gets stripped */
+.rich-preview {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  overflow-y: auto;
+}
+
+.rich-preview b,
+.rich-preview strong { font-weight: 700; }
+.rich-preview i,
+.rich-preview em { font-style: italic; }
+.rich-preview u { text-decoration: underline; }
+.rich-preview s,
+.rich-preview strike { text-decoration: line-through; }
+.rich-preview a { color: #1155CC; text-decoration: underline; }
+.rich-preview [style*="background"] { border-radius: 2px; }
+
 .tool-options {
   display: flex;
   flex-wrap: wrap;

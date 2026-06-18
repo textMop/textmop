@@ -37,14 +37,14 @@
       <div class="tool-panes">
         <div class="pane">
           <label for="input-box">
-            <span>Paste here</span>
+            <span>Original — paste here</span>
             <span class="count" id="input-count">0 words</span>
           </label>
           <div
             id="input-box"
-            class="text-box"
+            class="text-box rich-preview"
             contenteditable="true"
-            data-placeholder="Paste your formatted text here…"
+            data-placeholder="Paste your formatted text here — bold, colors, and styling will show so you can see what gets cleaned…"
           ></div>
         </div>
         <div class="pane">
@@ -52,7 +52,7 @@
             <span>Clean output</span>
             <span class="count" id="output-count">0 words</span>
           </label>
-          <textarea id="output-box" class="text-box" readonly placeholder="Your cleaned text will appear here…"></textarea>
+          <textarea id="output-box" class="text-box" readonly placeholder="Your cleaned plain text will appear here…"></textarea>
         </div>
       </div>
 
@@ -60,6 +60,7 @@
         <label><input type="checkbox" id="opt-trim-lines" checked /> Trim spaces at start/end of lines</label>
         <label><input type="checkbox" id="opt-collapse-spaces" checked /> Collapse multiple spaces</label>
         <label><input type="checkbox" id="opt-collapse-breaks" /> Remove extra blank lines</label>
+        <label><input type="checkbox" id="opt-strip-html" /> Strip visible HTML tags</label>
       </div>
 
       <div class="tool-actions">
