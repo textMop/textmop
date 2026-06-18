@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clean Paste — Strip Formatting from Text Online | TextMop</title>
+  <meta name="description" content="Paste text from Word, Google Docs, or a webpage and instantly strip all formatting. Free, private, and works entirely in your browser — nothing is uploaded." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="/">Text<span>Mop</span></a>
+      <nav class="site-nav">
+        <a href="/#tools">Tools</a>
+        <a href="/#privacy">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <div class="tool-header">
+      <h1>Clean Paste — strip formatting from text</h1>
+      <p>
+        Paste copied text from Word, Google Docs, an email, or a webpage into the box on the left.
+        TextMop instantly removes all hidden formatting — fonts, colors, links, bold, sizing —
+        and gives you plain text ready to paste anywhere.
+      </p>
+    </div>
+
+    <div class="tool-app">
+      <div class="tool-panes">
+        <div class="pane">
+          <label for="input-box">
+            <span>Paste here</span>
+            <span class="count" id="input-count">0 words</span>
+          </label>
+          <div
+            id="input-box"
+            class="text-box"
+            contenteditable="true"
+            data-placeholder="Paste your formatted text here…"
+          ></div>
+        </div>
+        <div class="pane">
+          <label for="output-box">
+            <span>Clean output</span>
+            <span class="count" id="output-count">0 words</span>
+          </label>
+          <textarea id="output-box" class="text-box" readonly placeholder="Your cleaned text will appear here…"></textarea>
+        </div>
+      </div>
+
+      <div class="tool-options">
+        <label><input type="checkbox" id="opt-trim-lines" checked /> Trim spaces at start/end of lines</label>
+        <label><input type="checkbox" id="opt-collapse-spaces" checked /> Collapse multiple spaces</label>
+        <label><input type="checkbox" id="opt-collapse-breaks" /> Remove extra blank lines</label>
+      </div>
+
+      <div class="tool-actions">
+        <button class="btn" id="copy-btn">Copy clean text</button>
+        <button class="btn btn-secondary" id="clear-btn">Clear</button>
+      </div>
+    </div>
+
+    <article class="tool-content">
+      <h2>Why use Clean Paste?</h2>
+      <p>
+        When you copy text from Word, Google Docs, Outlook, or a website, it usually brings
+        invisible formatting along with it — fonts, font sizes, colors, and layout styles hidden
+        in HTML tags. Pasting that text into a CMS, email tool, or form often breaks the layout
+        or looks completely different from the rest of your page.
+      </p>
+      <p>
+        Clean Paste strips all of that out, leaving you with plain text that matches whatever
+        you're pasting it into.
+      </p>
+
+      <h2>How it works</h2>
+      <p>
+        Paste your text into the box on the left. As soon as you paste, your browser strips out
+        the formatting automatically and shows the plain text result on the right. Use the
+        options above to also clean up extra spaces and blank lines. Then click
+        "Copy clean text" and paste it wherever you need it.
+      </p>
+
+      <h2>Your text stays private</h2>
+      <p>
+        Everything happens locally in your browser using JavaScript. Nothing you paste here is
+        ever sent to a server, saved, or logged — so it's safe to use with confidential
+        documents, client work, or anything else you wouldn't want uploaded online.
+      </p>
+    </article>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>&copy; 2026 TextMop</span>
+      <div class="footer-links">
+        <a href="/#tools">Tools</a>
+        <a href="/#privacy">Privacy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="clean-paste.js"></script>
+</body>
+</html>

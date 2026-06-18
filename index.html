@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TextMop — Free tools to clean up text, all in your browser</title>
+  <meta name="description" content="Free, fast tools that tidy up messy text and images. Strip formatting, clean up spacing and more — everything happens in your browser, nothing is ever uploaded." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="/">Text<span>Mop</span></a>
+      <nav class="site-nav">
+        <a href="#tools" class="active">Tools</a>
+        <a href="#privacy">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <section class="hero">
+      <h1>Paste messy. Copy clean.</h1>
+      <p class="lead">
+        Free browser-based tools that tidy up text and images.
+        No sign-up, no uploads — everything happens right on your device.
+      </p>
+      <div class="hero-actions">
+        <a class="btn" href="clean-paste.html">Try Clean Paste</a>
+        <a class="btn btn-secondary" href="#tools">Browse all tools</a>
+      </div>
+
+      <div class="sweep-demo" aria-hidden="true">
+        <div class="sweep-layer sweep-messy">Hi&nbsp;&nbsp;&nbsp;team,<span class="tag">&lt;span&gt;</span>please&nbsp;&nbsp;review&nbsp;the<br>attached&nbsp;&nbsp;&nbsp;&nbsp;doc<span class="tag">&lt;/font&gt;</span>&nbsp;&nbsp;by&nbsp;&nbsp;Friday.</div>
+        <div class="sweep-clean-wrap">
+          <div class="sweep-layer sweep-clean">Hi team, please review the<br>attached doc by Friday.</div>
+        </div>
+        <div class="sweep-bar"></div>
+      </div>
+    </section>
+
+    <section id="tools">
+      <p class="section-label">Tools</p>
+      <div class="tools-grid">
+
+        <a class="tool-card" href="clean-paste.html">
+          <span class="badge badge-live">Live</span>
+          <h3>Clean Paste</h3>
+          <p>Strip formatting from text copied out of Word, Google Docs, or web pages — paste back in plain text.</p>
+        </a>
+
+        <div class="tool-card disabled">
+          <span class="badge badge-soon">Coming soon</span>
+          <h3>Remove Extra Spaces</h3>
+          <p>Clean up double spaces, trailing whitespace, and extra line breaks in one click.</p>
+        </div>
+
+        <div class="tool-card disabled">
+          <span class="badge badge-soon">Coming soon</span>
+          <h3>Case Converter</h3>
+          <p>Switch text between UPPERCASE, lowercase, Title Case, and Sentence case.</p>
+        </div>
+
+        <div class="tool-card disabled">
+          <span class="badge badge-soon">Coming soon</span>
+          <h3>Word &amp; Character Counter</h3>
+          <p>Get instant word, character, and sentence counts as you type or paste.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="privacy" class="privacy-note">
+      <div class="icon">i</div>
+      <div>
+        <h2>Your text never leaves your device</h2>
+        <p>Every tool on TextMop runs entirely in your browser using JavaScript. Nothing you paste is ever sent to a server, stored, or logged — so it's safe to use with sensitive or private content.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>&copy; 2026 TextMop</span>
+      <div class="footer-links">
+        <a href="#tools">Tools</a>
+        <a href="#privacy">Privacy</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
