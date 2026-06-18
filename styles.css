@@ -16,7 +16,7 @@
   --font-display: "Sora", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
-  --max-width: 1100px;
+  --max-width: 1300px;
 }
 
 * {
@@ -481,6 +481,19 @@ input:focus-visible {
 .rich-preview u                        { text-decoration: underline; }
 .rich-preview s, .rich-preview strike  { text-decoration: line-through; }
 .rich-preview a                        { color: #1155CC; text-decoration: underline; }
+
+/* Right pane — same rich display, not editable */
+.output-pane {
+  background: var(--bg-card);
+  cursor: default;
+  user-select: text;
+}
+
+.output-pane:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
 
 /* ---------- Options panel ---------- */
 
