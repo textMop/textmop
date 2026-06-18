@@ -22,21 +22,22 @@
     </div>
   </header>
 
-  <main class="wrap">
+  <main class="wrap tool-wrap">
 
     <div class="tool-header">
       <h1>Clean Paste — strip formatting from text</h1>
       <p>
-        Paste copied text from Word, Google Docs, an email, or a webpage into the box on the left.
-        TextMop instantly removes all hidden formatting — fonts, colors, links, bold, sizing —
-        and gives you plain text ready to paste anywhere.
+        Paste copied text from Word, Google Docs, an email, or a webpage.
+        TextMop shows you exactly what formatting was found and lets you choose what to remove.
+        Your text never leaves your browser.
       </p>
     </div>
 
     <div class="tool-app">
+
       <div class="tool-panes">
         <div class="pane">
-          <label for="input-box">
+          <label>
             <span>Original — paste here</span>
             <span class="count" id="input-count">0 words</span>
           </label>
@@ -48,19 +49,20 @@
           ></div>
         </div>
         <div class="pane">
-          <label for="output-box">
+          <label>
             <span>Clean output</span>
             <span class="count" id="output-count">0 words</span>
           </label>
-          <textarea id="output-box" class="text-box" readonly placeholder="Your cleaned plain text will appear here…"></textarea>
+          <textarea id="output-box" class="text-box" readonly placeholder="Your cleaned text will appear here…"></textarea>
         </div>
       </div>
 
-      <div class="tool-options">
-        <label><input type="checkbox" id="opt-trim-lines" checked /> Trim spaces at start/end of lines</label>
-        <label><input type="checkbox" id="opt-collapse-spaces" checked /> Collapse multiple spaces</label>
-        <label><input type="checkbox" id="opt-collapse-breaks" /> Remove extra blank lines</label>
-        <label><input type="checkbox" id="opt-strip-html" /> Strip visible HTML tags</label>
+      <div class="options-wrap">
+        <p class="options-title">Cleanup options <span class="options-hint">— only showing what applies to your pasted text</span></p>
+        <p id="no-changes-msg" style="display:none;font-size:0.9rem;color:var(--text-muted)">
+          No formatting issues detected — your text looks clean already!
+        </p>
+        <div id="options-panel" class="options-grid" style="display:none"></div>
       </div>
 
       <div class="tool-actions">
@@ -72,29 +74,28 @@
     <article class="tool-content">
       <h2>Why use Clean Paste?</h2>
       <p>
-        When you copy text from Word, Google Docs, Outlook, or a website, it usually brings
-        invisible formatting along with it — fonts, font sizes, colors, and layout styles hidden
-        in HTML tags. Pasting that text into a CMS, email tool, or form often breaks the layout
-        or looks completely different from the rest of your page.
+        When you copy text from Word, Google Docs, Outlook, or a website, it brings
+        invisible formatting — fonts, font sizes, colors, and layout styles hidden
+        in HTML tags. Pasting into a CMS, email tool, or plain text field often breaks
+        the layout or looks wrong.
       </p>
       <p>
-        Clean Paste strips all of that out, leaving you with plain text that matches whatever
-        you're pasting it into.
+        Clean Paste shows you exactly what formatting was found and lets you pick what to strip —
+        so you stay in control instead of losing everything at once.
       </p>
 
       <h2>How it works</h2>
       <p>
-        Paste your text into the box on the left. As soon as you paste, your browser strips out
-        the formatting automatically and shows the plain text result on the right. Use the
-        options above to also clean up extra spaces and blank lines. Then click
-        "Copy clean text" and paste it wherever you need it.
+        Paste your text into the left box — bold, colors, and other formatting will show
+        so you can see what's there. TextMop detects what it found and shows only the
+        relevant cleanup options below. Check the ones you want, and the clean result
+        appears instantly on the right.
       </p>
 
       <h2>Your text stays private</h2>
       <p>
-        Everything happens locally in your browser using JavaScript. Nothing you paste here is
-        ever sent to a server, saved, or logged — so it's safe to use with confidential
-        documents, client work, or anything else you wouldn't want uploaded online.
+        Everything happens locally in your browser using JavaScript. Nothing you paste
+        is ever sent to a server, saved, or logged.
       </p>
     </article>
 
