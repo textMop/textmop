@@ -496,7 +496,7 @@ input:focus-visible {
 }
 
 .single-content-box {
-  cursor: default;
+  cursor: text;
   user-select: text;
   margin-bottom: 1.25rem;
 }

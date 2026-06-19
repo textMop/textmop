@@ -13,6 +13,15 @@ const noChangesMsg = document.getElementById('no-changes-msg');
 let originalHTML = '';
 let isModified   = false;
 
+// Block freeform typing — only allow paste
+contentBox.addEventListener('keydown', (e) => {
+  // Allow Ctrl/Cmd+V (paste), Ctrl/Cmd+A (select all), navigation keys
+  const allowed = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown'];
+  if (e.metaKey || e.ctrlKey) return; // allow all Cmd/Ctrl shortcuts
+  if (allowed.includes(e.key)) return;
+  e.preventDefault(); // block all other typing
+});
+
 // ── Paste ──────────────────────────────────────────────────────────────────
 contentBox.addEventListener('paste', (e) => {
   e.preventDefault();
