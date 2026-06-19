@@ -11,15 +11,13 @@ const optionsPanel = document.getElementById('options-panel');
 const noChangesMsg = document.getElementById('no-changes-msg');
 
 let originalHTML = '';
-let isModified   = false;
 
-// Block freeform typing — only allow paste
+// ── Block freeform typing — only allow paste ───────────────────────────────
 contentBox.addEventListener('keydown', (e) => {
-  // Allow Ctrl/Cmd+V (paste), Ctrl/Cmd+A (select all), navigation keys
   const allowed = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown'];
-  if (e.metaKey || e.ctrlKey) return; // allow all Cmd/Ctrl shortcuts
+  if (e.metaKey || e.ctrlKey) return;
   if (allowed.includes(e.key)) return;
-  e.preventDefault(); // block all other typing
+  e.preventDefault();
 });
 
 // ── Paste ──────────────────────────────────────────────────────────────────
@@ -36,7 +34,6 @@ contentBox.addEventListener('paste', (e) => {
     originalHTML = contentBox.innerHTML;
   }
 
-  isModified = false;
   setStatus('original');
   resetBtn.style.display = 'none';
   detectAndBuildOptions();
@@ -44,7 +41,7 @@ contentBox.addEventListener('paste', (e) => {
   autoResizeBox();
 });
 
-// ── Remove truly invisible junk only (scripts, Office tags, empty spans) ──
+// ── Remove truly invisible junk only ──────────────────────────────────────
 function removeInvisibleJunk(html) {
   const d = document.createElement('div');
   d.innerHTML = html;
@@ -52,30 +49,28 @@ function removeInvisibleJunk(html) {
   d.querySelectorAll('*').forEach(el => {
     if (el.tagName && el.tagName.includes(':')) el.remove();
   });
-  // Remove empty invisible spans (common in Google Docs exports)
   d.querySelectorAll('span').forEach(el => {
     if (!el.textContent.trim() && !el.children.length) el.remove();
   });
   return d.innerHTML;
 }
 
-// ── Apply all checked options and update content box ──────────────────────
+// ── Get checkbox state ─────────────────────────────────────────────────────
+function on(id) {
+  const el = document.getElementById(id);
+  return el ? el.checked : false;
+}
+
+// ── Apply all checked options to a clone and update content box ───────────
 function applyOptions() {
   const clone = document.createElement('div');
   clone.innerHTML = originalHTML;
 
-  const on = (id) => {
-    const el = document.getElementById(id);
-    return el ? el.checked : false;
-  };
-
-  // Unwrap: keep text children, remove wrapping tag
   const unwrap = (sel) => clone.querySelectorAll(sel).forEach(el => {
     while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
     el.parentNode.removeChild(el);
   });
 
-  // Remove specific CSS props from all styled elements
   const clearProp = (...props) => clone.querySelectorAll('[style]').forEach(el => {
     props.forEach(p => { try { el.style.removeProperty(p); } catch(e){} });
     if (!el.getAttribute('style') || !el.getAttribute('style').trim()) {
@@ -83,155 +78,183 @@ function applyOptions() {
     }
   });
 
-  // ── Bold ──
+  // Bold
   if (on('rm-bold')) {
     unwrap('b,strong');
     clearProp('font-weight');
-    // Neutralise heading default bold by converting to div
     clone.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(el => {
-      const div = document.createElement('div');
-      div.style.fontWeight = 'normal';
-      div.style.fontSize   = '1em';
-      div.style.margin     = '0';
-      while (el.firstChild) div.appendChild(el.firstChild);
-      el.parentNode.replaceChild(div, el);
+      el.style.fontWeight = 'normal';
     });
   }
 
-  // ── Italic ──
+  // Italic
   if (on('rm-italic')) { unwrap('i,em'); clearProp('font-style'); }
 
-  // ── Underline ──
+  // Underline
   if (on('rm-under')) {
     unwrap('u');
     clone.querySelectorAll('[style]').forEach(el => {
-      if (el.style.textDecoration.includes('underline')) {
+      if (el.style.textDecoration && el.style.textDecoration.includes('underline')) {
         el.style.textDecoration = el.style.textDecoration.replace('underline','').trim();
         if (!el.getAttribute('style').trim()) el.removeAttribute('style');
       }
     });
   }
 
-  // ── Strikethrough ──
+  // Strikethrough
   if (on('rm-strike')) {
     unwrap('s,strike');
     clone.querySelectorAll('[style]').forEach(el => {
-      if (el.style.textDecoration.includes('line-through')) {
+      if (el.style.textDecoration && el.style.textDecoration.includes('line-through')) {
         el.style.textDecoration = el.style.textDecoration.replace('line-through','').trim();
         if (!el.getAttribute('style').trim()) el.removeAttribute('style');
       }
     });
   }
 
-  // ── Text color (sub-checkbox) ──
+  // Colors — check both sub-checkboxes; parent being checked means both are checked
   if (on('rm-text-color')) {
     clearProp('color');
     clone.querySelectorAll('[color]').forEach(el => el.removeAttribute('color'));
   }
-
-  // ── Highlights / background color (sub-checkbox) ──
   if (on('rm-highlight')) {
     clearProp('background-color','background');
     clone.querySelectorAll('[bgcolor]').forEach(el => el.removeAttribute('bgcolor'));
   }
 
-  // ── Font sizes — individual sub-checkboxes ──
-  clone.querySelectorAll('[style*="font-size"],[size]').forEach(el => {
-    const size = el.style.fontSize || '';
-    const sizeAttr = el.getAttribute('size') || '';
-    const safeId = 'rm-size-' + cssEscape(size || 'attr-'+sizeAttr);
-    if (on(safeId)) {
+  // Hyperlinks
+  if (on('rm-links')) unwrap('a');
+
+  // Font sizes — individual sub-checkboxes
+  clone.querySelectorAll('[style]').forEach(el => {
+    const size = el.style.fontSize;
+    if (size && on('rm-size-' + cssEscape(size))) {
       el.style.removeProperty('font-size');
-      if (sizeAttr) el.removeAttribute('size');
-      if (!el.getAttribute('style') || !el.getAttribute('style').trim()) el.removeAttribute('style');
+      if (!el.getAttribute('style').trim()) el.removeAttribute('style');
     }
   });
-  // Also handle h1-h6 font sizes if checked
+  clone.querySelectorAll('[size]').forEach(el => {
+    const s = el.getAttribute('size');
+    if (s && on('rm-size-attr-' + s)) {
+      el.removeAttribute('size');
+    }
+  });
   clone.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(el => {
     const tag = el.tagName.toLowerCase();
-    if (on('rm-size-heading-'+tag)) {
+    if (on('rm-size-heading-' + tag)) {
       const div = document.createElement('div');
       div.style.fontSize = '1em';
       div.style.margin   = '0';
+      div.style.fontWeight = 'normal';
       while (el.firstChild) div.appendChild(el.firstChild);
       el.parentNode.replaceChild(div, el);
     }
   });
 
-  // ── Font families — individual sub-checkboxes ──
-  clone.querySelectorAll('[style*="font-family"],[face]').forEach(el => {
-    const family = cleanFamilyName(el.style.fontFamily || el.getAttribute('face') || '');
+  // Font families — individual sub-checkboxes
+  clone.querySelectorAll('[style]').forEach(el => {
+    const family = cleanFamilyName(el.style.fontFamily || '');
     if (family && on('rm-font-' + cssEscape(family))) {
       el.style.removeProperty('font-family');
-      if (el.getAttribute('face')) el.removeAttribute('face');
-      if (!el.getAttribute('style') || !el.getAttribute('style').trim()) el.removeAttribute('style');
+      if (!el.getAttribute('style').trim()) el.removeAttribute('style');
+    }
+  });
+  clone.querySelectorAll('[face]').forEach(el => {
+    const family = cleanFamilyName(el.getAttribute('face') || '');
+    if (family && on('rm-font-' + cssEscape(family))) {
+      el.removeAttribute('face');
     }
   });
 
-  // ── Links ──
-  if (on('rm-links')) unwrap('a');
-
-  // ── Strip visible HTML tags ──
+  // Visible HTML tags
   if (on('strip-html')) {
     const text = clone.innerText || clone.textContent || '';
     clone.innerHTML = '';
     clone.textContent = text;
   }
 
-  // ── Whitespace ──
+  // Whitespace
   if (on('trim-lines') || on('collapse-spaces') || on('extra-breaks')) {
     let text = clone.innerText || clone.textContent || '';
-    if (on('trim-lines'))       text = text.split('\n').map(l => l.trimEnd()).join('\n');
-    if (on('collapse-spaces'))  text = text.replace(/[ \t]+/g,' ');
-    if (on('extra-breaks'))     text = text.replace(/\n{3,}/g,'\n\n');
+    if (on('trim-lines'))      text = text.split('\n').map(l => l.trimEnd()).join('\n');
+    if (on('collapse-spaces')) text = text.replace(/[ \t]+/g,' ');
+    if (on('extra-breaks'))    text = text.replace(/\n{3,}/g,'\n\n');
     clone.innerHTML = '';
     clone.textContent = text;
   }
 
-  // Check if anything actually changed
   const changed = clone.innerHTML !== originalHTML;
   contentBox.innerHTML = clone.innerHTML;
-
-  if (changed) {
-    setStatus('modified');
-    resetBtn.style.display = 'block';
-    isModified = true;
-  } else {
-    setStatus('original');
-    resetBtn.style.display = 'none';
-    isModified = false;
-  }
-
+  setStatus(changed ? 'modified' : 'original');
+  resetBtn.style.display = changed ? 'block' : 'none';
   updateWordCount();
   autoResizeBox();
+}
+
+// ── Handle parent checkbox → sync subs first, then apply ──────────────────
+function handleCheckboxChange(e) {
+  const cb = e.target;
+
+  // If this is a parent, sync its subs to match
+  const subIds = (cb.dataset.subs || '').split(',').filter(Boolean);
+  if (subIds.length) {
+    subIds.forEach(id => {
+      const sub = document.getElementById(id);
+      if (sub) sub.checked = cb.checked;
+    });
+  }
+
+  // If this is a sub, update parent indeterminate state
+  const parentId = cb.dataset.parent;
+  if (parentId) {
+    const parent = document.getElementById(parentId);
+    if (parent) {
+      const siblingIds = (parent.dataset.subs || '').split(',').filter(Boolean);
+      const siblings = siblingIds.map(id => document.getElementById(id)).filter(Boolean);
+      const checkedCount = siblings.filter(s => s.checked).length;
+      if (checkedCount === 0) {
+        parent.checked = false;
+        parent.indeterminate = false;
+      } else if (checkedCount === siblings.length) {
+        parent.checked = true;
+        parent.indeterminate = false;
+      } else {
+        parent.checked = false;
+        parent.indeterminate = true;
+      }
+    }
+  }
+
+  applyOptions();
 }
 
 // ── Detect formatting and build option checkboxes ─────────────────────────
 function detectAndBuildOptions() {
   const el = document.createElement('div');
   el.innerHTML = originalHTML;
+  const text = el.innerText || el.textContent || '';
 
-  // Basic formatting counts
-  const bold     = el.querySelectorAll('b,strong,[style*="bold"]').length;
-  const italic   = el.querySelectorAll('i,em,[style*="italic"]').length;
-  const under    = el.querySelectorAll('u,[style*="underline"]').length;
-  const strike   = el.querySelectorAll('s,strike,[style*="line-through"]').length;
-  const links    = el.querySelectorAll('a[href]').length;
-  const visTags  = ((el.innerText||'').match(/<[a-z][^>]*>/gi)||[]).length;
+  // Formatting
+  const bold   = el.querySelectorAll('b,strong,[style*="bold"]').length;
+  const italic = el.querySelectorAll('i,em,[style*="italic"]').length;
+  const under  = el.querySelectorAll('u,[style*="underline"]').length;
+  const strike = el.querySelectorAll('s,strike,[style*="line-through"]').length;
+  const links  = el.querySelectorAll('a[href]').length;
 
-  // Sub-detect: text colors vs highlights
+  // Colors
   let textColorCount = 0, highlightCount = 0;
   el.querySelectorAll('[style]').forEach(node => {
-    if (node.style.color && node.style.color !== 'rgb(0, 0, 0)' && node.style.color !== '') textColorCount++;
-    if (node.style.backgroundColor && node.style.backgroundColor !== 'transparent' && node.style.backgroundColor !== '') highlightCount++;
-    if (node.style.background && node.style.background !== 'transparent' && node.style.background !== '') highlightCount++;
+    const c = node.style.color;
+    const bg = node.style.backgroundColor || node.style.background;
+    if (c && c !== 'rgb(0, 0, 0)' && c !== 'black' && c !== '') textColorCount++;
+    if (bg && bg !== 'transparent' && bg !== '' && bg !== 'rgba(0, 0, 0, 0)') highlightCount++;
   });
   el.querySelectorAll('[color]').forEach(() => textColorCount++);
   el.querySelectorAll('[bgcolor]').forEach(() => highlightCount++);
 
-  // Font sizes — collect unique sizes and counts
+  // Font sizes — unique sizes with counts
   const fontSizes = {};
-  el.querySelectorAll('[style*="font-size"]').forEach(node => {
+  el.querySelectorAll('[style]').forEach(node => {
     const s = node.style.fontSize;
     if (s) fontSizes[s] = (fontSizes[s]||0) + 1;
   });
@@ -239,23 +262,27 @@ function detectAndBuildOptions() {
     const s = 'attr:' + node.getAttribute('size');
     fontSizes[s] = (fontSizes[s]||0) + 1;
   });
-  // Headings as a size source
   const headings = {};
   el.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(node => {
     const tag = node.tagName.toLowerCase();
     headings[tag] = (headings[tag]||0) + 1;
   });
 
-  // Font families — collect unique families and counts
+  // Font families — unique families (no counts shown)
   const fontFamilies = {};
-  el.querySelectorAll('[style*="font-family"],[face]').forEach(node => {
-    const raw = node.style.fontFamily || node.getAttribute('face') || '';
-    const family = cleanFamilyName(raw);
+  el.querySelectorAll('[style]').forEach(node => {
+    const family = cleanFamilyName(node.style.fontFamily || '');
+    if (family) fontFamilies[family] = (fontFamilies[family]||0) + 1;
+  });
+  el.querySelectorAll('[face]').forEach(node => {
+    const family = cleanFamilyName(node.getAttribute('face') || '');
     if (family) fontFamilies[family] = (fontFamilies[family]||0) + 1;
   });
 
+  // Visible HTML
+  const visTags = (text.match(/<[a-z][^>]*>/gi)||[]).length;
+
   // Whitespace
-  const text = el.innerText || el.textContent || '';
   const trailingSpaces = text.split('\n').filter(l => /\s+$/.test(l)).length;
   const multiSpaces    = (text.match(/[ \t]{2,}/g)||[]).length;
   const extraBreaks    = (text.match(/\n{3,}/g)||[]).length;
@@ -263,57 +290,90 @@ function detectAndBuildOptions() {
   // Build groups
   const groups = [];
 
-  // Formatting group
-  const fmt = [];
-  if (bold)   fmt.push({ id:'rm-bold',   label:'Bold',          count: bold,   unit: bold===1?'instance':'instances' });
-  if (italic) fmt.push({ id:'rm-italic', label:'Italic',        count: italic, unit: italic===1?'instance':'instances' });
-  if (under)  fmt.push({ id:'rm-under',  label:'Underline',     count: under,  unit: under===1?'instance':'instances' });
-  if (strike) fmt.push({ id:'rm-strike', label:'Strikethrough', count: strike, unit: strike===1?'instance':'instances' });
-  if (links)  fmt.push({ id:'rm-links',  label:'Hyperlinks',    count: links,  unit: links===1?'link':'links' });
+  // ── Formatting group ──
+  const fmtItems = [];
+  if (bold)   fmtItems.push({ id:'rm-bold',   label:'Bold',          badge: plural(bold,'word') });
+  if (italic) fmtItems.push({ id:'rm-italic', label:'Italic',        badge: plural(italic,'word') });
+  if (under)  fmtItems.push({ id:'rm-under',  label:'Underline',     badge: plural(under,'word') });
+  if (strike) fmtItems.push({ id:'rm-strike', label:'Strikethrough', badge: plural(strike,'word') });
+  if (links)  fmtItems.push({ id:'rm-links',  label:'Hyperlinks',    badge: plural(links,'link') });
 
-  // Colors with sub-options
   const colorTotal = textColorCount + highlightCount;
   if (colorTotal > 0) {
     const colorSubs = [];
-    if (textColorCount) colorSubs.push({ id:'rm-text-color', label:'Text colors',           count: textColorCount, unit: textColorCount===1?'instance':'instances' });
-    if (highlightCount) colorSubs.push({ id:'rm-highlight',  label:'Highlights & background colors', count: highlightCount, unit: highlightCount===1?'instance':'instances' });
-    fmt.push({ id:'rm-colors', label:'Colors & highlights', count: colorTotal, unit: colorTotal===1?'instance':'instances', subs: colorSubs, parentOnly: true });
+    if (textColorCount) colorSubs.push({ id:'rm-text-color', label:'Text colors',                badge: plural(textColorCount,'element') });
+    if (highlightCount) colorSubs.push({ id:'rm-highlight',  label:'Highlights & backgrounds',   badge: plural(highlightCount,'element') });
+    fmtItems.push({
+      id: 'rm-colors',
+      label: 'Colors & highlights',
+      badge: plural(colorTotal,'element'),
+      subs: colorSubs,
+    });
   }
 
-  if (fmt.length) groups.push({ title: 'Formatting', items: fmt });
+  if (fmtItems.length) groups.push({ title:'Formatting', items:fmtItems });
 
-  // Font sizes group
-  const sizeItems = [];
+  // ── Font Sizes group ──
+  const sizeSubItems = [];
   Object.entries(fontSizes).forEach(([size, count]) => {
-    const displaySize = size.startsWith('attr:') ? 'Size attribute ' + size.replace('attr:','') : size;
-    sizeItems.push({ id: 'rm-size-' + cssEscape(size), label: displaySize, count, unit: count===1?'instance':'instances' });
+    const isAttr = size.startsWith('attr:');
+    const displaySize = isAttr ? 'Size ' + size.replace('attr:','') : size;
+    const id = isAttr ? 'rm-size-attr-' + size.replace('attr:','') : 'rm-size-' + cssEscape(size);
+    sizeSubItems.push({ id, label: displaySize, badge: plural(count,'paragraph') });
   });
+  const headingLabels = {h1:'Heading 1',h2:'Heading 2',h3:'Heading 3',h4:'Heading 4',h5:'Heading 5',h6:'Heading 6'};
   Object.entries(headings).forEach(([tag, count]) => {
-    const labels = {h1:'Heading 1 (H1)',h2:'Heading 2 (H2)',h3:'Heading 3 (H3)',h4:'Heading 4 (H4)',h5:'Heading 5 (H5)',h6:'Heading 6 (H6)'};
-    sizeItems.push({ id: 'rm-size-heading-'+tag, label: labels[tag]||tag.toUpperCase(), count, unit: count===1?'instance':'instances' });
+    sizeSubItems.push({
+      id: 'rm-size-heading-' + tag,
+      label: headingLabels[tag] + ' (' + tag.toUpperCase() + ')',
+      badge: plural(count,'heading')
+    });
   });
-  if (sizeItems.length) groups.push({ title: 'Font Sizes', items: sizeItems });
+  if (sizeSubItems.length) {
+    groups.push({
+      title: 'Font Sizes',
+      items: [{
+        id: 'rm-all-sizes',
+        label: 'All font sizes',
+        badge: plural(sizeSubItems.length,'size'),
+        subs: sizeSubItems,
+      }]
+    });
+  }
 
-  // Font families group
-  const familyItems = Object.entries(fontFamilies).map(([family, count]) => ({
+  // ── Font Families group ──
+  const familySubItems = Object.keys(fontFamilies).map(family => ({
     id: 'rm-font-' + cssEscape(family),
     label: family,
-    count,
-    unit: count===1?'instance':'instances'
+    badge: null, // no count for families — name is the info
   }));
-  if (familyItems.length) groups.push({ title: 'Font Families', items: familyItems });
+  if (familySubItems.length) {
+    groups.push({
+      title: 'Font Families',
+      items: [{
+        id: 'rm-all-fonts',
+        label: 'All font families',
+        badge: familySubItems.length === 1 ? '1 family' : familySubItems.length + ' families',
+        subs: familySubItems,
+      }]
+    });
+  }
 
-  // HTML group
-  if (visTags) groups.push({ title: 'HTML', items: [{ id:'strip-html', label:'Visible HTML tags', count: visTags, unit: visTags===1?'tag':'tags' }] });
+  // ── HTML group ──
+  if (visTags) {
+    groups.push({ title:'HTML', items:[{
+      id:'strip-html', label:'Strip visible HTML tags', badge: plural(visTags,'tag')
+    }]});
+  }
 
-  // Whitespace group
+  // ── Whitespace group ──
   const wsItems = [];
-  if (trailingSpaces) wsItems.push({ id:'trim-lines',      label:'Trailing spaces',    count: trailingSpaces, unit: trailingSpaces===1?'line':'lines' });
-  if (multiSpaces)    wsItems.push({ id:'collapse-spaces', label:'Multiple spaces',    count: multiSpaces,    unit: multiSpaces===1?'instance':'instances' });
-  if (extraBreaks)    wsItems.push({ id:'extra-breaks',    label:'Extra blank lines',  count: extraBreaks,    unit: extraBreaks===1?'found':'found' });
-  if (wsItems.length) groups.push({ title: 'Whitespace', items: wsItems });
+  if (trailingSpaces) wsItems.push({ id:'trim-lines',      label:'Trailing spaces',    badge: plural(trailingSpaces,'line') });
+  if (multiSpaces)    wsItems.push({ id:'collapse-spaces', label:'Multiple spaces',    badge: plural(multiSpaces,'found') });
+  if (extraBreaks)    wsItems.push({ id:'extra-breaks',    label:'Extra blank lines',  badge: plural(extraBreaks,'found') });
+  if (wsItems.length) groups.push({ title:'Whitespace', items:wsItems });
 
-  // Render options
+  // ── Render ──
   optionsPanel.innerHTML = '';
 
   if (!groups.length) {
@@ -333,15 +393,14 @@ function detectAndBuildOptions() {
     groupEl.innerHTML = `<p class="opt-group-title">${g.title}</p>`;
 
     g.items.forEach(item => {
-      const row = buildOptionRow(item, false);
-      groupEl.appendChild(row);
+      const subIds = (item.subs || []).map(s => s.id).join(',');
+      groupEl.appendChild(makeRow(item, false, '', subIds));
 
-      // Sub-checkboxes
       if (item.subs && item.subs.length) {
         const subsWrap = document.createElement('div');
         subsWrap.className = 'opt-subs';
         item.subs.forEach(sub => {
-          subsWrap.appendChild(buildOptionRow(sub, true));
+          subsWrap.appendChild(makeRow(sub, true, item.id, ''));
         });
         groupEl.appendChild(subsWrap);
       }
@@ -350,47 +409,32 @@ function detectAndBuildOptions() {
     optionsPanel.appendChild(groupEl);
   });
 
-  // Attach change listeners
+  // Attach listeners
   optionsPanel.querySelectorAll('input[type=checkbox]').forEach(cb => {
-    cb.addEventListener('change', function() {
-      // If a sub is checked, ensure parent is also checked (visual only)
-      applyOptions();
-    });
+    cb.addEventListener('change', handleCheckboxChange);
   });
 }
 
-function buildOptionRow(item, isSub) {
+function makeRow(item, isSub, parentId, subIds) {
   const row = document.createElement('label');
   row.className = 'opt-row' + (isSub ? ' opt-sub-row' : '');
-  if (item.parentOnly) {
-    // Parent checkbox that just visually groups — checking it checks all subs
-    row.innerHTML = `
-      <input type="checkbox" id="${item.id}" class="opt-parent-cb" data-subs="${(item.subs||[]).map(s=>s.id).join(',')}">
-      <span class="opt-label">${item.label}</span>
-      <span class="opt-count">${item.count} ${item.unit}</span>
-    `;
-  } else {
-    row.innerHTML = `
-      <input type="checkbox" id="${item.id}">
-      <span class="opt-label">${item.label}</span>
-      <span class="opt-count">${item.count} ${item.unit}</span>
-    `;
-  }
+  const dataParent = parentId ? `data-parent="${parentId}"` : '';
+  const dataSubs   = subIds   ? `data-subs="${subIds}"`     : '';
+  const badge      = item.badge ? `<span class="opt-count">${item.badge}</span>` : '';
+  row.innerHTML = `
+    <input type="checkbox" id="${item.id}" ${dataParent} ${dataSubs}>
+    <span class="opt-label">${item.label}</span>
+    ${badge}
+  `;
   return row;
 }
 
-// ── Handle parent checkboxes toggling their subs ───────────────────────────
-document.addEventListener('change', (e) => {
-  if (e.target.classList.contains('opt-parent-cb')) {
-    const subIds = (e.target.dataset.subs || '').split(',').filter(Boolean);
-    subIds.forEach(id => {
-      const sub = document.getElementById(id);
-      if (sub) sub.checked = e.target.checked;
-    });
-  }
-});
-
 // ── Helpers ────────────────────────────────────────────────────────────────
+function plural(n, unit) {
+  if (unit === 'found') return n > 1 ? n + ' found' : '1 found';
+  return n === 1 ? '1 ' + unit : n + ' ' + unit + 's';
+}
+
 function cssEscape(str) {
   return str.replace(/[^a-zA-Z0-9-_]/g, c => '_' + c.charCodeAt(0) + '_');
 }
@@ -402,7 +446,7 @@ function cleanFamilyName(raw) {
 
 function setStatus(status) {
   paneStatus.textContent = status === 'original' ? 'Original' : 'Modified';
-  paneStatus.className = 'pane-status-badge pane-status-' + status;
+  paneStatus.className   = 'pane-status-badge pane-status-' + status;
 }
 
 function autoResizeBox() {
@@ -415,18 +459,18 @@ function autoResizeBox() {
 
 function updateWordCount() {
   const text = (contentBox.innerText || contentBox.textContent || '').trim();
-  const words = text ? text.split(/\s+/).length : 0;
-  wordCount.textContent = words + ' words';
+  wordCount.textContent = (text ? text.split(/\s+/).length : 0) + ' words';
 }
 
 // ── Buttons ────────────────────────────────────────────────────────────────
 resetBtn.addEventListener('click', () => {
   contentBox.innerHTML = originalHTML;
-  // Uncheck all options
-  optionsPanel.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
+  optionsPanel.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.checked = false;
+    cb.indeterminate = false;
+  });
   setStatus('original');
   resetBtn.style.display = 'none';
-  isModified = false;
   updateWordCount();
   autoResizeBox();
 });
@@ -449,9 +493,8 @@ copyBtn.addEventListener('click', async () => {
 });
 
 clearBtn.addEventListener('click', () => {
-  contentBox.innerHTML = '';
-  originalHTML = '';
-  isModified   = false;
+  contentBox.innerHTML   = '';
+  originalHTML           = '';
   optionsWrap.style.display  = 'none';
   optionsPanel.innerHTML     = '';
   noChangesMsg.style.display = 'none';
