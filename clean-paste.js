@@ -35,7 +35,7 @@ contentBox.addEventListener('paste', (e) => {
   }
 
   setStatus('original');
-  resetBtn.style.display = 'none';
+  resetBtn.classList.remove('visible');
   detectAndBuildOptions();
   updateWordCount();
   autoResizeBox();
@@ -186,7 +186,7 @@ function applyOptions() {
   const changed = clone.innerHTML !== originalHTML;
   contentBox.innerHTML = clone.innerHTML;
   setStatus(changed ? 'modified' : 'original');
-  resetBtn.style.display = changed ? 'block' : 'none';
+  changed ? resetBtn.classList.add('visible') : resetBtn.classList.remove('visible');
   updateWordCount();
   autoResizeBox();
 }
@@ -470,7 +470,7 @@ resetBtn.addEventListener('click', () => {
     cb.indeterminate = false;
   });
   setStatus('original');
-  resetBtn.style.display = 'none';
+  resetBtn.classList.remove('visible');
   updateWordCount();
   autoResizeBox();
 });
@@ -498,7 +498,7 @@ clearBtn.addEventListener('click', () => {
   optionsWrap.style.display  = 'none';
   optionsPanel.innerHTML     = '';
   noChangesMsg.style.display = 'none';
-  resetBtn.style.display     = 'none';
+  resetBtn.classList.remove('visible');
   contentBox.style.height    = '300px';
   contentBox.style.overflowY = 'hidden';
   setStatus('original');
