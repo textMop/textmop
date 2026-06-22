@@ -14,12 +14,7 @@ let originalHTML = '';
 
 // ── Block freeform typing — only allow paste ───────────────────────────────
 contentBox.addEventListener('keydown', (e) => {
-  const allowed = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown','Tab'];
-  // Block undo/redo — they would desync the display from originalHTML
-  if ((e.metaKey || e.ctrlKey) && (e.key === 'z' || e.key === 'Z' || e.key === 'y' || e.key === 'Y')) {
-    e.preventDefault();
-    return;
-  }
+  const allowed = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown'];
   if (e.metaKey || e.ctrlKey) return;
   if (allowed.includes(e.key)) return;
   e.preventDefault();
@@ -237,7 +232,7 @@ function handleCheckboxChange(e) {
 function detectAndBuildOptions() {
   const el = document.createElement('div');
   el.innerHTML = originalHTML;
-  const text = el.textContent || '';
+  const text = el.innerText || el.textContent || '';
 
   // Formatting
   const bold   = el.querySelectorAll('b,strong,[style*="bold"]').length;
@@ -324,7 +319,7 @@ function detectAndBuildOptions() {
     const isAttr = size.startsWith('attr:');
     const displaySize = isAttr ? 'Size ' + size.replace('attr:','') : size;
     const id = isAttr ? 'rm-size-attr-' + size.replace('attr:','') : 'rm-size-' + cssEscape(size);
-    sizeSubItems.push({ id, label: displaySize, badge: plural(count,'element') });
+    sizeSubItems.push({ id, label: displaySize, badge: plural(count,'paragraph') });
   });
   const headingLabels = {h1:'Heading 1',h2:'Heading 2',h3:'Heading 3',h4:'Heading 4',h5:'Heading 5',h6:'Heading 6'};
   Object.entries(headings).forEach(([tag, count]) => {
@@ -453,8 +448,6 @@ function setStatus(status) {
   paneStatus.textContent = status === 'original' ? 'Original' : 'Modified';
   paneStatus.className   = 'pane-status-badge pane-status-' + status;
 }
-
-window.addEventListener('resize', () => { if (originalHTML) autoResizeBox(); });
 
 function autoResizeBox() {
   const maxH = Math.floor(window.innerHeight * 0.6);
