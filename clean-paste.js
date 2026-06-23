@@ -183,12 +183,121 @@ function applyOptions() {
     clone.textContent = text;
   }
 
+
   const changed = clone.innerHTML !== originalHTML;
+
+  // Mark affected elements before rendering so we can flash them
+  markAffectedElements(clone);
+
   contentBox.innerHTML = clone.innerHTML;
+
+  // Flash marked elements now they're in the live DOM
+  contentBox.querySelectorAll('[data-flash]').forEach(el => {
+    el.removeAttribute('data-flash');
+    el.classList.remove('flash-changed');
+    void el.offsetWidth; // force reflow so animation retriggers
+    el.classList.add('flash-changed');
+    el.addEventListener('animationend', () => el.classList.remove('flash-changed'), { once: true });
+  });
+
   setStatus(changed ? 'modified' : 'original');
   changed ? resetBtn.classList.add('visible') : resetBtn.classList.remove('visible');
   updateWordCount();
   autoResizeBox();
+}
+
+// ── Mark elements in clone that will be visually changed ─────────────────
+function markAffectedElements(clone) {
+  const mark = (sel) => clone.querySelectorAll(sel).forEach(el => el.setAttribute('data-flash','1'));
+
+  // We mark BEFORE the unwrap/style removal happens — these are elements
+  // that were in the original and are about to lose something visible.
+  // Since we're working on the already-modified clone, we scan originalHTML
+  // to find what used to exist and mark matching positions.
+  const orig = document.createElement('div');
+  orig.innerHTML = originalHTML;
+
+  if (on('rm-bold')) {
+    orig.querySelectorAll('b,strong,[style*="bold"]').forEach(el => {
+      const text = el.textContent.trim();
+      if (!text) return;
+      clone.querySelectorAll('*').forEach(node => {
+        if (node.textContent.trim() === text) node.setAttribute('data-flash','1');
+      });
+    });
+  }
+  if (on('rm-italic')) {
+    orig.querySelectorAll('i,em,[style*="italic"]').forEach(el => {
+      const text = el.textContent.trim();
+      clone.querySelectorAll('*').forEach(node => {
+        if (node.textContent.trim() === text) node.setAttribute('data-flash','1');
+      });
+    });
+  }
+  if (on('rm-under')) {
+    orig.querySelectorAll('u,[style*="underline"]').forEach(el => {
+      const text = el.textContent.trim();
+      clone.querySelectorAll('*').forEach(node => {
+        if (node.textContent.trim() === text) node.setAttribute('data-flash','1');
+      });
+    });
+  }
+  if (on('rm-text-color')) {
+    orig.querySelectorAll('[style*="color"],[color]').forEach(el => el.setAttribute('data-flash','1'));
+    // Match by text in clone
+    orig.querySelectorAll('[style*="color"],[color]').forEach(el => {
+      const text = el.textContent.trim();
+      clone.querySelectorAll('*').forEach(node => {
+        if (node.textContent.trim() === text) node.setAttribute('data-flash','1');
+      });
+    });
+  }
+  if (on('rm-highlight')) {
+    orig.querySelectorAll('[style*="background"],[bgcolor]').forEach(el => {
+      const text = el.textContent.trim();
+      clone.querySelectorAll('*').forEach(node => {
+        if (node.textContent.trim() === text) node.setAttribute('data-flash','1');
+      });
+    });
+  }
+  if (on('rm-links')) {
+    orig.querySelectorAll('a[href]').forEach(el => {
+      const text = el.textContent.trim();
+      clone.querySelectorAll('*').forEach(node => {
+        if (node.textContent.trim() === text) node.setAttribute('data-flash','1');
+      });
+    });
+  }
+
+  // Font sizes — mark elements that had this specific size
+  orig.querySelectorAll('[style*="font-size"]').forEach(el => {
+    const size = el.style.fontSize;
+    if (size && on('rm-size-' + cssEscape(size))) {
+      const text = el.textContent.trim();
+      clone.querySelectorAll('*').forEach(node => {
+        if (node.textContent.trim() === text) node.setAttribute('data-flash','1');
+      });
+    }
+  });
+  orig.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(el => {
+    if (on('rm-size-heading-' + el.tagName.toLowerCase())) {
+      const text = el.textContent.trim();
+      clone.querySelectorAll('*').forEach(node => {
+        if (node.textContent.trim() === text) node.setAttribute('data-flash','1');
+      });
+    }
+  });
+
+  // Font families — mark elements with this family
+  orig.querySelectorAll('[style*="font-family"],[face]').forEach(el => {
+    const family = cleanFamilyName(el.style.fontFamily || el.getAttribute('face') || '');
+    if (family && on('rm-font-' + cssEscape(family))) {
+      const text = el.textContent.trim();
+      clone.querySelectorAll('*').forEach(node => {
+        if (node.textContent.trim() === text) node.setAttribute('data-flash','1');
+      });
+    }
+  });
 }
 
 // ── Handle parent checkbox → sync subs first, then apply ──────────────────
