@@ -235,5 +235,6 @@ AI-assisted drafting. Plan:
 | Session 1 | Domain, email, GitHub, Netlify setup, homepage, Clean Paste v1 | Site live at textmop.com |
 | Session 2 | Clean Paste refinements — rich preview, granular checkboxes, flash highlight | Multiple bugs found, decided to respec |
 | Session 3 | Wrote project plan + Clean Paste spec, decided to rebuild Clean Paste step-by-step, added Playwright testing strategy | Two spec docs created; flash highlight deferred to post-v1; added grayed-out disabled options requirement; broke build into 16 incremental steps, each with its own Playwright test run against the full suite before committing |
+| Session 4 | Playwright setup (Step 0): installed @playwright/test, downloaded browsers, generated playwright.config.js + tests/ folder, confirmed sample suite passes (6/6). Also fixed an exposed GitHub token (removed from git remote/package.json, revoked, set up secure per-repo token auth via macOS Keychain), added node_modules/test-results to .gitignore | Step 0 complete — ready to begin Clean Paste rebuild Step 1 |
 
 _(Add a row each session so future chats have full context fast.)_

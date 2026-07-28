@@ -165,7 +165,7 @@ number you're on and paste this spec — Claude will know exactly what "done"
 looks like for that step, including which test to write, without needing
 the full history re-explained.
 
-- [ ] **Step 0 — Playwright setup.** One-time only, before Step 1. Run the
+- ✅ Step 0 — Playwright setup. One-time only, before Step 1. Run the
       setup commands in TEXTMOP-PROJECT-PLAN.md §5a. Confirm
       `npx playwright test` runs (even with zero tests) before moving on.
 - [ ] **Step 1 — Box shell.** Build the empty content box with correct
