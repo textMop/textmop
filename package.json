@@ -1,0 +1,21 @@
+{
+  "name": "textmop",
+  "version": "1.0.0",
+  "description": "<!-- **textMop/textmop** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.",
+  "main": "clean-paste.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/textMop/textmop/issues"
+  },
+  "homepage": "https://github.com/textMop/textmop#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "@types/node": "^26.1.2"
+  }
+}
