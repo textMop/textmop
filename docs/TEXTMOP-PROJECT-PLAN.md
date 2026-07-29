@@ -1,6 +1,6 @@
 # TextMop — Project Plan
 
-_Last updated: [update this date each session]_
+_Last updated: July 28, 2026_
 
 ## 1. What TextMop Is
 
@@ -27,8 +27,8 @@ real site.
 - ✅ Hosting: Netlify, auto-deploys on every git push
 - ✅ SSL: auto-provisioned via Netlify/Let's Encrypt
 - ✅ Homepage (index.html) — live, tool cards grid, sweep animation
-- 🔄 Clean Paste tool — functional but has known bugs, currently being
-  respecced and rebuilt cleanly (see CLEAN-PASTE-SPEC.md)
+- 🔄 Clean Paste tool — being rebuilt step-by-step per CLEAN-PASTE-SPEC.md;
+  Step 1 (box shell) complete and fully tested, Step 2 (rich paste display) next
 
 None of this needs to be redone. We're only revisiting the *tool logic*, not
 the foundation.
@@ -74,6 +74,11 @@ To avoid the "bug fixing in circles" problem, every tool follows this sequence:
 4. **One markdown spec file per tool**, so a fresh Claude chat can pick up
    exactly where we left off without losing context. Store these in the repo
    under a `/docs` folder so they're versioned with the code.
+5. **At the start of any new step's chat**, paste in the current
+   TEXTMOP-PROJECT-PLAN.md, the relevant tool spec, and the current state of
+   whatever files are being worked on. This keeps a fresh Claude chat working
+   from what's actually in the repo rather than assuming prior chat output
+   was saved correctly.
 
 ---
 
@@ -169,6 +174,16 @@ npx playwright test --ui     # run with visual UI (great for debugging)
 - The Step 16 flash highlight animation (optional post-v1 polish) — light
   manual smoke-test is enough
 
+**Cross-browser paste simulation note (learned in Step 1):** don't rely on
+real OS clipboard permissions in tests (`context.grantPermissions(['clipboard-
+read', 'clipboard-write'])`) — Firefox and WebKit don't support those
+permission names reliably. Instead, dispatch a synthetic `ClipboardEvent`
+with a `DataTransfer` payload, and force `clipboardData` onto the event with
+`Object.defineProperty()` rather than passing it through the constructor's
+options object — Firefox doesn't reliably honor `clipboardData` passed that
+way, even though Chromium and WebKit do. This pattern should be reused for
+all future paste-related tests (Step 2 onward).
+
 Test files live in `tests/`, one file per tool, e.g. `tests/clean-paste.spec.js`.
 This grows into a full regression suite automatically as more tools are built.
 
@@ -221,10 +236,11 @@ AI-assisted drafting. Plan:
 ## 9. Open Questions / Decisions Needed
 
 - [ ] Analytics: Google Analytics vs a privacy-friendly alternative?
-- [ ] Should Clean Paste v1 ship without the flash highlight animation, and
+- [x] Should Clean Paste v1 ship without the flash highlight animation, and
       add it back later as pure polish once the core logic is bulletproof?
-- [ ] Confirm: are we OK with Clean Paste "resetting" cleanly rather than
-      supporting undo/redo history? (Simpler, recommended for v1.)
+      — confirmed yes, deferred to Step 16.
+- [x] Confirm: are we OK with Clean Paste "resetting" cleanly rather than
+      supporting undo/redo history? — confirmed, simpler, sufficient for v1.
 
 ---
 
@@ -236,5 +252,6 @@ AI-assisted drafting. Plan:
 | Session 2 | Clean Paste refinements — rich preview, granular checkboxes, flash highlight | Multiple bugs found, decided to respec |
 | Session 3 | Wrote project plan + Clean Paste spec, decided to rebuild Clean Paste step-by-step, added Playwright testing strategy | Two spec docs created; flash highlight deferred to post-v1; added grayed-out disabled options requirement; broke build into 16 incremental steps, each with its own Playwright test run against the full suite before committing |
 | Session 4 | Playwright setup (Step 0): installed @playwright/test, downloaded browsers, generated playwright.config.js + tests/ folder, confirmed sample suite passes (6/6). Also fixed an exposed GitHub token (removed from git remote/package.json, revoked, set up secure per-repo token auth via macOS Keychain), added node_modules/test-results to .gitignore | Step 0 complete — ready to begin Clean Paste rebuild Step 1 |
+| Session 5 | Clean Paste Step 1 (box shell): built the empty paste-only content box using the existing design-system classes (`.tool-wrap`, `.tool-app`, `.text-box`, etc.) instead of one-off styles; added `clean-paste.html` header/footer to match site nav; fixed two pre-existing `styles.css` bugs found while wiring things up (a duplicate `.wrap` class that was breaking site-wide header/footer layout, and an orphaned selector-less CSS rule left over from v1); added an explicit `paste` event handler in `clean-paste.js` (previously relied on untestable native browser default paste behavior); wrote and passed 4 Playwright tests across Chromium/Firefox/WebKit — hit and resolved two cross-browser test issues (clipboard permission API differences, and Firefox not honoring `clipboardData` passed through the `ClipboardEvent` constructor) | Step 1 complete, 12/12 tests passing, committed and pushed — ready for Step 2 (rich paste display) |
 
 _(Add a row each session so future chats have full context fast.)_

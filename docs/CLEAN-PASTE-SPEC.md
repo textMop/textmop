@@ -1,6 +1,6 @@
 # Clean Paste — Tool Spec
 
-_Status: Respec'd after v1 revealed architectural bugs. Rebuild pending._
+_Status: Respec'd after v1 revealed architectural bugs. Rebuild in progress — Step 1 complete._
 
 ## 1. One-sentence definition
 
@@ -163,24 +163,45 @@ steps later.
 **When starting a new chat for a specific step**, tell Claude which step
 number you're on and paste this spec — Claude will know exactly what "done"
 looks like for that step, including which test to write, without needing
-the full history re-explained.
+the full history re-explained. Also paste the current state of
+`clean-paste.html`, `clean-paste.js`, `styles.css`, and
+`tests/clean-paste.spec.js` so Claude is working from what's actually in the
+repo rather than assuming prior chat output was saved correctly.
 
 - ✅ Step 0 — Playwright setup. One-time only, before Step 1. Run the
       setup commands in TEXTMOP-PROJECT-PLAN.md §5a. Confirm
       `npx playwright test` runs (even with zero tests) before moving on.
-- [ ] **Step 1 — Box shell.** Build the empty content box with correct
+- ✅ **Step 1 — Box shell.** Build the empty content box with correct
       styling, placeholder text, focus state, and paste-only behavior
       (typing blocked). No formatting logic yet — just confirm you can
       click in, paste plain text, and see it appear. Confirm layout/sizing
       looks right (min-height, max-height + scroll, spacing around it).
       **Test:** page loads, box exists, typing does nothing, pasting plain
       text shows it in the box.
+      **Done:** built using the site's existing design-system classes
+      (`.tool-wrap`, `.tool-app`, `.text-box`, `.single-content-box`,
+      `.rich-preview`) rather than one-off styles, with the site
+      header/footer included for nav consistency. Added an explicit `paste`
+      event handler in `clean-paste.js` that inserts plain text at the
+      cursor via the Selection/Range API (needed because the browser's
+      native default paste behavior can't be triggered by automated tests —
+      only real, trusted user pastes). 4 Playwright tests written and
+      passing across Chromium/Firefox/WebKit. Also fixed two pre-existing
+      `styles.css` bugs surfaced during integration: a duplicate `.wrap`
+      class overriding the site-wide header/footer layout, and an orphaned
+      selector-less CSS rule left over from v1.
 - [ ] **Step 2 — Rich paste display.** Confirm that pasting *formatted*
       content (bold, italic, colored, etc. from Google Docs) displays with
       that formatting visibly intact in the box — no options/checkboxes
-      yet, just confirm the box correctly shows rich content as-is.
+      yet, just confirm the box correctly shows rich content as-is. Will
+      also need to extend the Step 1 paste handler to read `text/html` off
+      the clipboard (currently only reads `text/plain`) and store it as
+      `originalHTML`.
       **Test:** simulate pasting HTML with a `<b>` tag, assert the bold
-      element exists in the rendered box.
+      element exists in the rendered box. Reuse the Step 1 pattern for
+      simulating paste events (synthetic `ClipboardEvent` + `DataTransfer`,
+      with `clipboardData` forced on via `Object.defineProperty` for
+      Firefox compatibility — see TEXTMOP-PROJECT-PLAN.md §5a).
 - [ ] **Step 3 — Status badge + word count + Clear button.** Add the
       Original/Modified badge (always shows "Original" for now since no
       edits are possible yet), live word count, and a working Clear button.
@@ -274,4 +295,3 @@ the full history re-explained.
 - [x] Playwright chosen for automated testing. A test is written and the
       full suite must pass after every single build step, not just at the
       end — this is what actually prevents regressions.
-
