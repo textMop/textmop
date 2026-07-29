@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clean Paste — Strip Formatting from Text Online | TextMop</title>
-  <meta name="description" content="Paste text from Word, Google Docs, or a webpage and instantly strip all formatting. Free, private, and works entirely in your browser — nothing is uploaded." />
+  <title>Clean Paste — TextMop</title>
+  <meta name="description" content="Paste formatted text from Word, Google Docs, or a webpage and selectively strip the formatting you don't want — free, runs entirely in your browser." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -16,8 +16,8 @@
     <div class="wrap">
       <a class="logo" href="/">Text<span>Mop</span></a>
       <nav class="site-nav">
-        <a href="/#tools">Tools</a>
-        <a href="/#privacy">Privacy</a>
+        <a href="index.html">Tools</a>
+        <a href="index.html#privacy">Privacy</a>
       </nav>
     </div>
   </header>
@@ -25,67 +25,18 @@
   <main class="wrap tool-wrap">
 
     <div class="tool-header">
-      <h1>Clean Paste — strip formatting from text</h1>
-      <p>
-        Paste text from Word, Google Docs, an email, or a webpage.
-        TextMop detects what formatting is present and lets you remove exactly what you want.
-        Your text never leaves your browser.
-      </p>
+      <h1>Clean Paste</h1>
+      <p>Paste formatted text below. (Typing isn't supported — paste only.)</p>
     </div>
 
     <div class="tool-app">
-
-      <!-- Single content box -->
-      <div class="single-pane-header">
-        <div class="single-pane-label">
-          <span id="pane-status" class="pane-status-badge pane-status-original">Original</span>
-          <span id="word-count" class="count">0 words</span>
-        </div>
-        <button class="btn-reset" id="reset-btn">↺ Reset to original</button>
-      </div>
-
       <div
-        id="content-box"
-        class="text-box rich-preview single-content-box"
+        id="paste-box"
+        class="text-box single-content-box rich-preview"
         contenteditable="true"
-        data-placeholder="Paste your text here — bold, colors, and all formatting will show so you can see exactly what gets cleaned…"
+        data-placeholder="Click here and paste (Cmd/Ctrl+V) your formatted text..."
       ></div>
-
-      <!-- Options -->
-      <div class="options-wrap" id="options-wrap" style="display:none">
-        <p class="options-title">
-          Cleanup options
-          <span class="options-hint">— only showing what was found in your paste</span>
-        </p>
-        <p id="no-changes-msg" style="display:none;font-size:0.9rem;color:var(--text-muted);margin:0">
-          No formatting issues detected — your text looks clean already.
-        </p>
-        <div id="options-panel" class="options-grid"></div>
-      </div>
-
-      <div class="tool-actions">
-        <button class="btn" id="copy-btn">Copy clean text</button>
-        <button class="btn btn-secondary" id="clear-btn">Clear</button>
-      </div>
     </div>
-
-    <article class="tool-content">
-      <h2>Why use Clean Paste?</h2>
-      <p>
-        When you copy text from Word, Google Docs, Outlook, or a website, it brings
-        invisible formatting with it — fonts, sizes, colors, and layout styles hidden in HTML.
-        Pasting into a CMS or email tool often breaks your layout.
-      </p>
-      <p>
-        Clean Paste shows you what formatting was found and lets you pick exactly what to remove,
-        so you stay in control.
-      </p>
-      <h2>Your text stays private</h2>
-      <p>
-        Everything happens locally in your browser. Nothing you paste is ever sent to a server,
-        saved, or logged — safe for confidential documents and client work.
-      </p>
-    </article>
 
   </main>
 
@@ -93,12 +44,13 @@
     <div class="wrap">
       <span>&copy; 2026 TextMop</span>
       <div class="footer-links">
-        <a href="/#tools">Tools</a>
-        <a href="/#privacy">Privacy</a>
+        <a href="index.html">Tools</a>
+        <a href="index.html#privacy">Privacy</a>
       </div>
     </div>
   </footer>
 
   <script src="clean-paste.js"></script>
+
 </body>
 </html>

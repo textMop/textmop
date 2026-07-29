@@ -618,10 +618,6 @@ input:focus-visible {
 .flash-changed {
   animation: flashChange 1.4s ease-out forwards;
 }
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
 
 /* ── SEO content below tool ── */
 .tool-content {
@@ -669,3 +665,4 @@ input:focus-visible {
   display: flex;
   gap: 1.25rem;
 }
+
